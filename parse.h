@@ -14,7 +14,7 @@ enum {gid = 3};
 enum {comments = 4};
 enum {home_path = 5};
 enum {interpretator = 6};
-enum {num_of_users = 1000};
+enum {num_of_users = 32};/*in my system is 32*/
 enum {num_of_fields = 7};
 enum {max_num_of_semicolons = 6};
 

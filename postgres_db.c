@@ -165,6 +165,7 @@ struct user_info* users;
 	j = 0;
 	for (i = 0; i < num_of_users; i++)
 	{
+		printf("DEBUG_PRINT___%i_____DEBUG_PRINT\n", i);
 		param_values[j] = users[i].user_name;
 		param_values[j + 2] = users[i].user_id;
 		param_values[j + 3] = users[i].group_id;
