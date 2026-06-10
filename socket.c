@@ -5,7 +5,7 @@ static create_socket(socket_fd);
 static bind_socket(socket_fd);
 static reuse_port_immediately(socket_fd);
 static server_listen(socket_fd);
-static server_accept(socket_fd);
+static server_accept(new_socket_fd);
 
 static create_socket(socket_fd)
 int* socket_fd;
@@ -54,6 +54,7 @@ static reuse_port_immediately(socket_fd)
 int socket_fd;
 {
 	int res, n;
+	n = 0;
 	errno = 0;
 	res = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &n, sizeof(n));
 	if (res == -1)
@@ -75,28 +76,32 @@ static server_listen(socket_fd)
 	}
 }
 
-static server_accept(socket_fd)
-int socket_fd;
+static server_accept(new_socket_fd)
+int* new_socket_fd;
 {
-	int new_socket_fd;
 	errno = 0;
-	new_socket_fd = accept(socket_fd, NULL, NULL);
-	if (new_socket_fd == -1)
+	*new_socket_fd = accept(socket_fd, NULL, NULL);
+	if (*new_socket_fd == -1)
 	{
 		perror("ERROR: in function server_accept(socket_fd) in line 83 failed to accept connection\n");
 		exit(6);
 	}
-	return new_socket_fd;
 }
+
+
+#if 0
+close_http_server()
+{
+        reuse_port_immediately(socket_fd);
+        socket_close(socket_fd);
+}
+#endif
 
 create_http_server()
 {
-	int new_socket_fd;
 	create_socket(&socket_fd);
 	bind_socket(socket_fd);
 	server_listen(socket_fd);
-	new_socket_fd = server_accept(socket_fd);
-	return new_socket_fd;
 }
 
 read_data(buffer, fd)
@@ -114,14 +119,31 @@ int fd;
 	*(buffer + cnt) = 0;
 }
 
-write_data(msg)
+write_data(msg, socket_fd)
 const char* msg;
+int socket_fd;
 {
-
+	ssize_t cnt;
+	size_t len;
+	len = strlen(msg);
+	errno = 0;
+	cnt = write(socket_fd, msg, len);
+	if (cnt == -1)
+	{
+		perror("ERROR: in function write_data(msg, socket_fd) in line 131 failed to write data\n");
+		exit(7);
+	}
 }
 
+accept_http_request(new_socket_fd)
+int* new_socket_fd;
+{
+	server_accept(new_socket_fd);
+}
+#if 1
 close_http_server()
 {
 	reuse_port_immediately(socket_fd);
 	socket_close(socket_fd);
 }
+#endif

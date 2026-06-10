@@ -4,7 +4,10 @@
 #include "sql.h"
 #include "socket.h"
 
-char storage[buffer_size];
+static char storage[buffer_size];
+const char* http_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 20\r\nConnection: close\r\n\r\n<h1>Hello, World!</h1>";
+			      
+#endif
 main(argc, argv)
 int argc;
 char** argv;
@@ -21,15 +24,20 @@ char** argv;
 	fill_database(users);
 	db_finish();
 #if 1
-	new_socket_fd = create_http_server();
+	create_http_server();
 	for (;;)
 	{
+		accept_http_request(&new_socket_fd);
 		read_data(storage, new_socket_fd);
 		len = strlen(storage);
 		*(storage + len) = 0;
 		printf("Data - %s\n", storage);
+		write_data(http_response, new_socket_fd);
+		printf("I`m here");
+		close(new_socket_fd);
 		break;
 	}
+	printf("close\n");
 	close_http_server();
 #endif	
         exit(0);

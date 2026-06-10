@@ -12,8 +12,9 @@
 enum {http_port = 8080};
 enum {buffer_size = 255};
 enum {queue = 15};
-create_http_server();
+create_http_server(new_socket_fd);
 read_data(buffer, fd);
-write_data(msg);
+write_data(msg, socket_fd);
+accept_http_request(new_socket_fd);
 close_http_server();
 #endif
