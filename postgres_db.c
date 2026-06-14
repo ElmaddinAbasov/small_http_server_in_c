@@ -178,6 +178,18 @@ struct user_info* users;
 	}
 }
 
+find_user(query, value)
+const char* query;
+const char* value;
+{
+	PGresult* pg_res;
+	const char* param_values[] = {"Gacy"};
+	run_query("BEGIN", &pg_res);
+	run_query("SELECT * FROM users WHERE user_name = root", &pg_res);
+	run_query("COMMIT", &pg_res);
+	printf("RUN_QUERY_DEBUG_PRINT - %d\n", PQnfields(pg_res));
+}
+
 db_finish()
 {
 	PQfinish(conn);
