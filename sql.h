@@ -13,4 +13,5 @@ enum {num_of_params = 7};
 
 #define INSERT "INSERT INTO users (user_name,password,user_id,group_id,comments,home_path,path_to_interpretator) VALUES ($1,$2,$3,$4,$5,$6,$7);"
 
+#define FIND_USER "SELECT * FROM users WHERE user_name = $1;"
 #endif

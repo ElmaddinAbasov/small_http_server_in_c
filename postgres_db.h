@@ -20,5 +20,6 @@ connect_to_db(host, port, dbname, user, password);
 create_database();
 create_table();
 fill_database(users);
+find_user(query, value);
 db_finish();
 #endif

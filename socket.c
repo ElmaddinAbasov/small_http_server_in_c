@@ -1,6 +1,7 @@
 #include "socket.h"
 
 static socket_fd;
+static char key_word[] = "username";
 static create_socket(socket_fd);
 static bind_socket(socket_fd);
 static reuse_port_immediately(socket_fd);
@@ -130,6 +131,45 @@ accept_http_request(new_socket_fd)
 int* new_socket_fd;
 {
 	server_accept(new_socket_fd);
+}
+
+get_info(socket_fd, ok)
+int socket_fd;
+int* ok;
+{
+	struct sockaddr_in client_address;
+	socklen_t slen;
+	slen = sizeof(client_address);
+	errno = 0;
+       	*ok = getsockname(socket_fd, (struct sockaddr*)&client_address, &slen);
+        if (*ok == -1)
+		return -1;
+
+        printf("\nCLINET PORT - %d\t CLIENT IP_ADDRESS - %s\n\n", ntohs(client_address.sin_port), inet_ntoa(client_address.sin_addr));       	
+}
+
+parse_url(url, value)						
+const char* url;
+char* value;
+{
+	int i, len, j, k;
+	len = strlen(url);
+	j = 0;
+	k = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (*(url + i) == '/' || *(url + i) == '=')
+			continue;
+		if (*(url + i) == *(key_word + k))
+		{
+			k++;
+			continue;
+		}
+		*(value + j) = *(url + i);
+		j++;
+	}
+	*(value + j) = 0;
+	printf("__DEBUG__ PARSED KEY_VALUE pair = %s\n", value);
 }
 
 close_http_server()

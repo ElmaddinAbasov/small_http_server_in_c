@@ -16,5 +16,7 @@ create_http_server(new_socket_fd);
 read_data(buffer, fd);
 write_data(msg, socket_fd);
 accept_http_request(new_socket_fd);
+get_info(socket_fd, ok);
+parse_url(url, value);
 close_http_server();
 #endif
