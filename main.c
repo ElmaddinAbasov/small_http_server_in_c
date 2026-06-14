@@ -5,9 +5,12 @@
 #include "socket.h"
 
 static char storage[buffer_size];
-const char* http_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 20\r\nConnection: close\r\n\r\n<h1>Hello, World!</h1>";
+const char http_response[] = "HTTP/1.1 200 OK\r\n"
+			     "Content-Type: text/html\r\n"
+			     "Content-Length: 20\r\n"
+			     "Connection: close\r\n\r\n"
+			     "<h1>Hello, World!</h1>";
 			      
-#endif
 main(argc, argv)
 int argc;
 char** argv;
@@ -23,7 +26,7 @@ char** argv;
 	create_table();
 	fill_database(users);
 	db_finish();
-#if 1
+
 	create_http_server();
 	for (;;)
 	{
@@ -39,7 +42,7 @@ char** argv;
 	}
 	printf("close\n");
 	close_http_server();
-#endif	
+	
         exit(0);
 }
 

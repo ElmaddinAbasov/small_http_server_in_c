@@ -88,15 +88,6 @@ int* new_socket_fd;
 	}
 }
 
-
-#if 0
-close_http_server()
-{
-        reuse_port_immediately(socket_fd);
-        socket_close(socket_fd);
-}
-#endif
-
 create_http_server()
 {
 	create_socket(&socket_fd);
@@ -140,10 +131,10 @@ int* new_socket_fd;
 {
 	server_accept(new_socket_fd);
 }
-#if 1
+
 close_http_server()
 {
 	reuse_port_immediately(socket_fd);
 	socket_close(socket_fd);
 }
-#endif
+
