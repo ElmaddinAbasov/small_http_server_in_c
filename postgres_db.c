@@ -99,7 +99,6 @@ create_database()
 	if (PQresultStatus(pg_res) == PGRES_TUPLES_OK)
 	{
 		rows = PQntuples(pg_res);
-#if 1		
 		for (i = 0; i < rows; i++)
 		{
 			string = PQgetvalue(pg_res, i, 0);
@@ -109,12 +108,6 @@ create_database()
 				return 0;
 			}
 		}
-#else
-		res = 0;
-		evaluate_args(pg_res, rows, DB_NAME_TO_CREATE, "PROGRAM WARNING : Database %s already exsists\n", &res);
-		if (res == 1)
-			return 0;
-#endif		
 	}
 	run_query(CREATE_DB, &pg_res);
 }
@@ -133,19 +126,12 @@ create_table()
 		for (i = 0; i < rows; i++)
 		{
 			string = PQgetvalue(pg_res, i, 0);
-#if 1			
 			if (0 == strcmp(string, TABLE_NAME))
 			{
 				fprintf(stdout, "PROGRAM WARNING : Table %s already exsists\n", string);
 				return 0;
 			}
 			printf("TABLE NAME %s\n", string);
-#else
-			res = 0;
-			evaluate_args(pg_res, rows, TABLE_NAME, "PROGRAM WARNING : Table %s already exsists\n", &res);
-			if (res == 1)
-				return 0;
-#endif			
 		}
 	}	
 	PQfinish(conn);
@@ -160,7 +146,7 @@ struct user_info* users;
 {
 	PGresult* pg_res;
 	int i, j;
-	char* param_values[array_length] = {" ", "x", " ", " ", " ", " ", " "};
+	char* param_values[array_length] = {" ", "x", " ", " ", "x", " ", " "};
 	
 	j = 0;
 	for (i = 0; i < num_of_users; i++)
@@ -169,7 +155,9 @@ struct user_info* users;
 		param_values[j] = users[i].user_name;
 		param_values[j + 2] = users[i].user_id;
 		param_values[j + 3] = users[i].group_id;
+#if 0		
 		param_values[j + 4] = users[i].comments;
+#endif		
 		param_values[j + 5] = users[i].home_path;
 		param_values[j + 6] = users[i].path_to_interpretator;
 		run_query("BEGIN", &pg_res);
@@ -183,11 +171,29 @@ const char* query;
 const char* value;
 {
 	PGresult* pg_res;
-	const char* param_values[] = {"Gacy"};
-	run_query("BEGIN", &pg_res);
-	run_query("SELECT * FROM users WHERE user_name = root", &pg_res);
-	run_query("COMMIT", &pg_res);
-	printf("RUN_QUERY_DEBUG_PRINT - %d\n", PQnfields(pg_res));
+	int i, j, rows, cols;
+	const char* param_values[1] = {value};	/*concat query string with value and run sql query*/
+#if 1
+	strcpy(db_info, "SELECT * FROM users WHERE user_name = '");
+	strcat(db_info, value);
+	strcat(db_info, "'");
+	printf("DB_INFO - %s\n", db_info);
+	pg_res = PQexec(conn, db_info);
+	if (PQresultStatus(pg_res) != PGRES_TUPLES_OK)
+	{
+		fprintf(stderr, "%s\n", PQresultErrorMessage(pg_res));
+	}
+#else
+	run_param_query("SELECT * FROM users WHERE user_name = $1;", 1, param_values, &pg_res);
+#endif	
+	rows = PQntuples(pg_res);
+	cols = PQnfields(pg_res);
+	printf("ROWS - %d\tCOLS-%d\n", rows, cols);
+	for (i = 0; i < rows; i++)
+	{
+		for (j = 0; j < cols; j++)
+			printf("%s\n", PQgetvalue(pg_res, i, j));
+	}
 }
 
 db_finish()
