@@ -30,15 +30,18 @@ char** argv;
 {
 	int new_socket_fd, ok;
 	size_t len;
-
+#if 1
         init();
         printf("buffer - \n%s\n", buffer);
         parse(buffer);
 	connect_to_db(HOST, PORT, DEFAULT_DB_NAME, USER, PASSWORD);
 	create_database();
+#endif	
 	connect_to_db(HOST, PORT, DB_NAME, USER, PASSWORD);
+#if 1	
 	create_table();
 	fill_database(users);
+#endif	
 #if 0	
 	db_finish();
 #endif
