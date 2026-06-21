@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdarg.h>
+#include "parse.h"
 enum {http_port = 8080};
 enum {buffer_size = 255};
 enum {queue = 15};

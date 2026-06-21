@@ -2,11 +2,15 @@
 
 static socket_fd;
 static char key_word[] = "username";
+static char http_response[buffer_size << 1];
+static char string[buffer_size << 1];
 static create_socket(socket_fd);
 static bind_socket(socket_fd);
 static reuse_port_immediately(socket_fd);
 static server_listen(socket_fd);
 static server_accept(new_socket_fd);
+static build_http_response(user);
+static build_string(user);
 
 static create_socket(socket_fd)
 int* socket_fd;
@@ -89,6 +93,50 @@ int* new_socket_fd;
 	}
 }
 
+static build_string(user)
+const struct user_info* user;
+{
+	size_t len;
+	strcpy(string, user->user_name);
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, "x");
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, user->user_id);
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, user->group_id);
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, "x");
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, user->home_path);
+	len = strlen(string);
+	*(string + len) = ':';
+	strcat(string, user->path_to_interpretator);
+	len = strlen(string);
+	*(string + len) = 0;
+}
+
+static build_http_response(user)
+const struct user_info* user; 
+{
+	size_t content_length;
+	build_string(user);
+	content_length = strlen(string);
+	snprintf(http_response, sizeof(http_response),
+		"HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/html\r\n"
+                "Content-Length: %lu\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "%s\r\n"
+                , content_length, string);
+
+}
+
 create_http_server()
 {
 	create_socket(&socket_fd);
@@ -112,14 +160,15 @@ int fd;
 }
 
 write_data(msg, socket_fd)
-const char* msg;
+const struct user_info* msg;
 int socket_fd;
 {
 	ssize_t cnt;
 	size_t len;
-	len = strlen(msg);
+	build_http_response(msg);
+	len = strlen(http_response);
 	errno = 0;
-	cnt = write(socket_fd, msg, len);
+	cnt = write(socket_fd, http_response, len);
 	if (cnt == -1)
 	{
 		perror("ERROR: in function write_data(msg, socket_fd) in line 131 failed to write data\n");

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "init.h"
 #include "parse.h"
 #include "postgres_db.h"
@@ -9,11 +10,14 @@ static char method[buffer_size];
 static char uri[buffer_size];
 static char value[buffer_size];
 static char version[buffer_size];
-const char http_response[] = "HTTP/1.1 200 OK\r\n"
+static char http_response[] = "HTTP/1.1 200 OK\r\n"
 			     "Content-Type: text/html\r\n"
 			     "Content-Length: 20\r\n"
 			     "Connection: close\r\n\r\n"
-			     "<h1>Hello, World!</h1>";
+			     "<h1>Hello, World!</h1>\r\n\r\n"
+			     "<p>";
+
+static char https_response[buffer_size];
 
 static free_resources(fd);
 static free_resources(fd)
@@ -30,22 +34,19 @@ char** argv;
 {
 	int new_socket_fd, ok;
 	size_t len;
+	struct user_info userss;
 #if 1
         init();
         printf("buffer - \n%s\n", buffer);
         parse(buffer);
 	connect_to_db(HOST, PORT, DEFAULT_DB_NAME, USER, PASSWORD);
 	create_database();
-#endif	
 	connect_to_db(HOST, PORT, DB_NAME, USER, PASSWORD);
-#if 1	
 	create_table();
 	fill_database(users);
-#endif	
-#if 0	
-	db_finish();
 #endif
 	create_http_server();
+
 	for (;;)
 	{
 		accept_http_request(&new_socket_fd);
@@ -66,9 +67,18 @@ char** argv;
 		
 		printf("HTTP_METHOD - %s\t URI - %s\t HTTP_VERSION - %s\n", method, uri, version);
 
-		find_user(FIND_USER, value);
-
-		write_data(http_response, new_socket_fd);
+		find_user(FIND_USER, value, &userss);
+#if 0
+		snprintf(https_response, sizeof(https_response),
+			     "HTTP/1.1 200 OK\r\n"
+                             "Content-Type: text/html\r\n"
+                             "Content-Length: %lu\r\n"
+                             "Connection: close\r\n"
+			     "\r\n"
+			     "%s"
+		, strlen(userss.user_name), userss.user_name);
+#endif		
+		write_data(&userss, new_socket_fd);
 
 		printf("I`m here");
 
