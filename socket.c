@@ -134,7 +134,6 @@ const struct user_info* user;
                 "\r\n"
                 "%s\r\n"
                 , content_length, string);
-
 }
 
 create_http_server()
